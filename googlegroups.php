@@ -6,7 +6,7 @@ use CRM_Googlegroups_ExtensionUtil as E;
 /**
  * Implements hook_civicrm_config().
  *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_config/ 
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_config/
  */
 function googlegroups_civicrm_config(&$config) {
   _googlegroups_civix_civicrm_config($config);
@@ -27,6 +27,21 @@ function googlegroups_civicrm_xmlMenu(&$files) {
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_install
  */
 function googlegroups_civicrm_install() {
+  $extensionDir       = dirname( __FILE__ ) . DIRECTORY_SEPARATOR;
+  $customDataXMLFile  = $extensionDir  . '/xml/custom.xml';
+  $import = new CRM_Utils_Migrate_Import();
+  $import->run($customDataXMLFile);
+
+  $params = array(
+    'sequential'    => 1,
+    'name'          => 'Google Group Sync',
+    'description'   => 'Sync contacts between CiviCRM and Google Group',
+    'run_frequency' => 'Daily',
+    'api_entity'    => 'Googlegroup',
+    'api_action'    => 'sync',
+    'is_active'     => 0,
+  );
+  $result = civicrm_api3('job', 'create', $params);
   _googlegroups_civix_civicrm_install();
 }
 
