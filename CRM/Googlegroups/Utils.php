@@ -8,11 +8,12 @@ class CRM_Googlegroups_Utils {
     return $result;
   }
 
-  static function setSettings($params = array()) {
+  static function setSettings($params = [], $createNew = FALSE) {
     $sParams = ['name' => 'googlegroups_settings'];
-    $result  = civicrm_api3('Setting', 'getvalue', $sParams);
-    $result  = empty($result) ? array() : $result;
-
+    if (!$createNew) {
+      $result = civicrm_api3('Setting', 'getvalue', $sParams);
+    }
+    $result = empty($result) ? [] : $result;
     $params = array_merge($result, $params);
     $params = [
       'googlegroups_settings' => $params

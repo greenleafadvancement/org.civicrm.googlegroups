@@ -59,9 +59,8 @@ class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
     $params = [
       'client_id' => $values['client_id'],
       'client_secret' => $values['client_secret'],
-      'access_token'  => ''
     ];
-    GG::setSettings($params);
+    GG::setSettings($params, TRUE);
 
     GG::initToken();
     parent::postProcess();
