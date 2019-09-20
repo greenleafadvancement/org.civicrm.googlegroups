@@ -3,28 +3,21 @@
 class CRM_Googlegroups_Utils {
 
   static function getSettings() {
-    $params = ['name' => 'googlegroups_settings'];
-    $result = civicrm_api3('Setting', 'getvalue', $params);
-    return $result;
+    return civicrm_api3('Setting', 'getvalue', ['name' => 'googlegroups_settings']);
   }
 
   static function setSettings($params = [], $createNew = FALSE) {
-    $sParams = ['name' => 'googlegroups_settings'];
     if (!$createNew) {
-      $result = civicrm_api3('Setting', 'getvalue', $sParams);
+      $result = civicrm_api3('Setting', 'getvalue', ['name' => 'googlegroups_settings']);
     }
     $result = empty($result) ? [] : $result;
     $params = array_merge($result, $params);
-    $params = [
-      'googlegroups_settings' => $params
-    ];
-    civicrm_api3('Setting', 'create', $params);
+    civicrm_api3('Setting', 'create', ['googlegroups_settings' => $params]);
     return self::getSettings();
   }
 
   static function setAccessToken($token) {
-    $params = ['access_token' => $token];
-    return self::setSettings($params);
+    return self::setSettings(['access_token' => $token]);
   }
   
   static function getAccessToken() {
