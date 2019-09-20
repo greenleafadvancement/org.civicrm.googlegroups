@@ -1,6 +1,7 @@
 <?php
 
 use CRM_Googlegroups_ExtensionUtil as E;
+use CRM_Googlegroups_Utils as GG;
 
 /**
  * Form controller class
@@ -8,71 +9,62 @@ use CRM_Googlegroups_ExtensionUtil as E;
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
 class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
-  public function buildQuickForm() {
 
-    // add form elements
-    $this->add(
-      'select', // field type
-      'favorite_color', // field name
-      'Favorite Color', // field label
-      $this->getColorOptions(), // list of options
-      TRUE // is required
-    );
+  public function preProcess() {
+    $code = CRM_Utils_Request::retrieve('code', 'String', $this);
+    if ($code) {
+      $client = GG::getClient();
+      $result = $client->fetchAccessTokenWithAuthCode($code);
+      $client->setAccessToken($result);
+
+      if (array_key_exists('error', $result)) {
+        CRM_Core_Session::setStatus(ts('Unable to establish connection with google groups. Make sure credentials are correct.'), ts('Something Went Wrong!'), 'error');
+      } else {
+        $params = ['access_token' => $result['access_token']];
+        GG::setSettings($params);
+        CRM_Core_Session::setStatus(ts('Connection with Google Groups was successfully established'), ts('Success'), 'success');
+      }
+      CRM_Utils_System::redirect(CRM_Utils_System::url("civicrm/googlegroups/settings", 'reset=1'));
+    }
+  }
+
+  public function buildQuickForm() {
+    $this->addElement('text', 'client_id', E::ts('Client ID'), array(
+      'size' => 98,
+    ));
+    $this->addElement('text', 'client_secret', E::ts('Client Secret'), array(
+      'size' => 48,
+    ));
+    $accessToken = GG::getAccessToken();
+
     $this->addButtons(array(
       array(
         'type' => 'submit',
-        'name' => E::ts('Submit'),
+        'name' => $accessToken ? E::ts('Reestablish connection with Google Groups') : E::ts('Establish connection with Google Groups'),
         'isDefault' => TRUE,
       ),
     ));
-
-    // export form elements
-    $this->assign('elementNames', $this->getRenderableElementNames());
     parent::buildQuickForm();
+  }
+
+  public function setDefaultValues() {
+    $defaults = GG::getSettings();
+    return $defaults;
   }
 
   public function postProcess() {
     $values = $this->exportValues();
-    $options = $this->getColorOptions();
-    CRM_Core_Session::setStatus(E::ts('You picked color "%1"', array(
-      1 => $options[$values['favorite_color']],
-    )));
+
+    // fixme: sanitize
+    $params = [
+      'client_id' => $values['client_id'],
+      'client_secret' => $values['client_secret'],
+      'access_token'  => ''
+    ];
+    GG::setSettings($params);
+
+    GG::initToken();
     parent::postProcess();
-  }
-
-  public function getColorOptions() {
-    $options = array(
-      '' => E::ts('- select -'),
-      '#f00' => E::ts('Red'),
-      '#0f0' => E::ts('Green'),
-      '#00f' => E::ts('Blue'),
-      '#f0f' => E::ts('Purple'),
-    );
-    foreach (array('1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e') as $f) {
-      $options["#{$f}{$f}{$f}"] = E::ts('Grey (%1)', array(1 => $f));
-    }
-    return $options;
-  }
-
-  /**
-   * Get the fields/elements defined in this form.
-   *
-   * @return array (string)
-   */
-  public function getRenderableElementNames() {
-    // The _elements list includes some items which should not be
-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
-    // items don't have labels.  We'll identify renderable by filtering on
-    // the 'label'.
-    $elementNames = array();
-    foreach ($this->_elements as $element) {
-      /** @var HTML_QuickForm_Element $element */
-      $label = $element->getLabel();
-      if (!empty($label)) {
-        $elementNames[] = $element->getName();
-      }
-    }
-    return $elementNames;
   }
 
 }
