@@ -2,6 +2,9 @@
 
 class CRM_Googlegroups_Utils {
 
+  const 
+    SETTING_NAME = 'googlegroups_settings';
+
   static function getSettings() {
     return civicrm_api3('Setting', 'getvalue', ['name' => 'googlegroups_settings']);
   }
@@ -25,12 +28,22 @@ class CRM_Googlegroups_Utils {
     return CRM_Utils_Array::value('access_token', $params);
   }
 
+  static function getStats() {
+    $params = self::getSettings();
+    return CRM_Utils_Array::value('stats', $params);
+  }
+
+  static function setStats($params) {
+    return self::setSettings(['stats' => $params]);
+  }
+
+  static function getDomains() {
+    $params = self::getSettings();
+    return CRM_Utils_Array::value('domains', $params, []);
+  }
+
   static function initToken() {
     $client = self::getClient();
-    $accessToken = self::getAccessToken();
-    if (!empty($accessToken)) {
-      $client->setAccessToken($accessToken);
-    }
     // If there is no previous token or it's expired.
     if ($client->isAccessTokenExpired()) {
       // Refresh the token if possible, else fetch a new one.
@@ -61,6 +74,10 @@ class CRM_Googlegroups_Utils {
     $redirectUrl = CRM_Utils_System::url('civicrm/googlegroups/settings', 'reset=1',  TRUE, NULL, FALSE, TRUE, TRUE);
     $client->setRedirectUri($redirectUrl);
 
+    $accessToken = self::getAccessToken();
+    if (!empty($accessToken)) {
+      $client->setAccessToken($accessToken);
+    }
     return $client;
   }
 
@@ -74,7 +91,6 @@ class CRM_Googlegroups_Utils {
     }
 
     if ($gc_group_id) {
-      // just want results for a particular MC list.
       $whereClause .= " AND gc_group_id = %1 ";
       $params[1] = array($gc_group_id, 'String');
     }
@@ -106,7 +122,7 @@ class CRM_Googlegroups_Utils {
         $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
         $groupContactCache->group_id = $groupID;
         if ($start !== null) {
-          $groupContactCache->limit($start, CRM_Googlegroup_Form_Sync::BATCH_COUNT);
+          $groupContactCache->limit($start, CRM_Googlegroups_Form_Sync::BATCH_COUNT);
         }
         $groupContactCache->find();
         return $groupContactCache;
@@ -116,7 +132,7 @@ class CRM_Googlegroups_Utils {
         $groupContact->group_id = $groupID;
         $groupContact->whereAdd("status = 'Added'");
         if ($start !== null) {
-          $groupContact->limit($start, CRM_Googlegroup_Form_Sync::BATCH_COUNT);
+          $groupContact->limit($start, CRM_Googlegroups_Form_Sync::BATCH_COUNT);
         }
         $groupContact->find();
         return $groupContact;

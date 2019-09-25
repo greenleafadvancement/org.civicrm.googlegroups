@@ -4,6 +4,12 @@
     <path>civicrm/googlegroups/settings</path>
     <page_callback>CRM_Googlegroups_Form_Settings</page_callback>
     <title>Settings</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/googlegroups/sync</path>
+    <page_callback>CRM_Googlegroups_Form_Sync</page_callback>
+    <title>Googlegroups Sync</title>
+    <access_arguments>administer CiviCRM</access_arguments>
   </item>
 </menu>
