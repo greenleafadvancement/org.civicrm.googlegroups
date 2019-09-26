@@ -13,14 +13,17 @@ class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
   public function preProcess() {
     $code = CRM_Utils_Request::retrieve('code', 'String', $this);
     if ($code) {
-      $client = GG::getClient();
+      $client = GG::getClient(FALSE);
+      // note $result is accessToken, and not refreshToken
       $result = $client->fetchAccessTokenWithAuthCode($code);
-      $client->setAccessToken($result);
 
       if (array_key_exists('error', $result)) {
         CRM_Core_Session::setStatus(ts('Could not authorize connection with google. Make sure credentials are correct.'), ts('Something Went Wrong!'), 'error');
       } else {
-        GG::setAccessToken($client->getAccessToken());
+        // Long lived refresh token are sent only first time.
+        if ($client->getRefreshToken()) {
+          GG::setAccessToken($client->getRefreshToken());
+        }
         CRM_Core_Session::setStatus(ts('Connection with Google was successfully authorized.'), ts('Success'), 'success');
       }
       CRM_Utils_System::redirect(CRM_Utils_System::url("civicrm/googlegroups/settings", 'reset=1'));
@@ -42,7 +45,7 @@ class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
     $this->addButtons(array(
       array(
         'type' => 'submit',
-        'name' => !empty($accessToken) ? E::ts('Re-Authorize') : E::ts('Authorize'),
+        'name' => !empty($accessToken) ? E::ts('Re-Authorize if Required') : E::ts('Authorize'),
         'isDefault' => TRUE,
       ),
     ));
@@ -69,9 +72,13 @@ class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
       $values['domains'] = explode(',', $values['domains']);
       $params['domains'] = array_map('trim', $values['domains']);
     }
-    GG::setSettings($params, TRUE);
+    // Overwrite settings
+    GG::setSettings($params);
+    // init token if required.
+    $client = GG::getClient();
+    // Being at this point means that we weren't redirected because of accessToken being valid.
+    CRM_Core_Session::setStatus(ts('Already authorized.'), ts('Success'), 'success');
 
-    GG::initToken();
     parent::postProcess();
   }
 

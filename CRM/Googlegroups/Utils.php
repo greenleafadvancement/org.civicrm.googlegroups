@@ -42,41 +42,36 @@ class CRM_Googlegroups_Utils {
     return CRM_Utils_Array::value('domains', $params, []);
   }
 
-  static function initToken() {
-    $client = self::getClient();
-    // If there is no previous token or it's expired.
-    if ($client->isAccessTokenExpired()) {
-      // Refresh the token if possible, else fetch a new one.
-      if ($client->getRefreshToken()) {
-        $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-      } else {
-        // Request authorization from the user.
-        $authUrl = $client->createAuthUrl();
-        header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
-        exit();
-      }
-      // Save the token
-      self::setAccessToken($client->getAccessToken());
-    }
-    return TRUE;
-  }
-
-  static function getClient() {
+  static function getClient($initTokenIfRequired = TRUE) {
     $params = self::getSettings();
 
     require_once 'vendor/autoload.php';
     $client = new Google_Client();
     $client->setClientId($params['client_id']);
     $client->setClientSecret($params['client_secret']);
+    $client->setApplicationName('CiviCRM GoogleGroups Extension');
     $client->setAccessType('offline');
     $client->addScope(Google_Service_Directory::ADMIN_DIRECTORY_GROUP);
+    // Using "consent" ensures that your application always receives a refresh token.
+    // If you are not using offline access, you can omit this.
+    // This is not really working.
+    // $client->setApprovalPrompt("select_account consent");
 
     $redirectUrl = CRM_Utils_System::url('civicrm/googlegroups/settings', 'reset=1',  TRUE, NULL, FALSE, TRUE, TRUE);
     $client->setRedirectUri($redirectUrl);
 
-    $accessToken = self::getAccessToken();
-    if (!empty($accessToken)) {
-      $client->setAccessToken($accessToken);
+    if ($initTokenIfRequired) {
+      $accessToken = self::getAccessToken();
+      if (!empty($accessToken)) {
+        $client->fetchAccessTokenWithRefreshToken($accessToken);
+      }
+      // If there is no previous token or it's expired.
+      if ($client->isAccessTokenExpired()) {
+        // Request authorization from the user.
+        $authUrl = $client->createAuthUrl();
+        header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));
+        exit();
+      }
     }
     return $client;
   }
