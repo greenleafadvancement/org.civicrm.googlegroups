@@ -63,7 +63,7 @@ class CRM_Googlegroups_Utils {
     if ($initTokenIfRequired) {
       $accessToken = self::getAccessToken();
       if (!empty($accessToken)) {
-        $client->fetchAccessTokenWithRefreshToken($accessToken);
+        $accessResult = $client->fetchAccessTokenWithRefreshToken($accessToken);
       }
       // If there is no previous token or it's expired.
       if ($client->isAccessTokenExpired()) {

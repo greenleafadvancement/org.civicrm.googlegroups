@@ -170,9 +170,7 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
    * Collect Mailchimp data into temporary working table.
    */
   static function syncPushCollectGoogleGroups(CRM_Queue_TaskContext $ctx, $groupID) {
-
-    //$stats[$groupID]['mc_count'] = static::syncCollectGoogle($groupID);
-    $stats[$groupID]['gg_count'] = static::syncCollectGoogle($groupID);
+    $stats[$groupID]['googlegroups_count'] = static::syncCollectGoogle($groupID);
     static::updatePushStats($stats);
 
     return CRM_Queue_Task::TASK_SUCCESS;
@@ -182,7 +180,7 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
    * Collect CiviCRM data into temporary working table.
    */
   static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $groupID) {
-    $stats[$groupID]['c_count'] = static::syncCollectCiviCRM($groupID);
+    $stats[$groupID]['civi_count'] = static::syncCollectCiviCRM($groupID);
     static::updatePushStats($stats);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
@@ -191,7 +189,6 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
    * Unsubscribe contacts that are subscribed at Mailchimp but not in our list.
    */
   static function syncPushRemove(CRM_Queue_TaskContext $ctx, $groupID) {
-    
     $dao = CRM_Core_DAO::executeQuery(
       "SELECT m.email, m.euid
        FROM tmp_googlegroups_g m
@@ -206,20 +203,18 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
       $batch[] = $dao->email;
       $stats[$groupID]['removed']++;
     }
-    if (!$batch) {
-      // Nothing to do
-      return CRM_Queue_Task::TASK_SUCCESS;
-    }
     // Log the batch unsubscribe details
     CRM_Core_Error::debug_var( 'Google Group batchUnsubscribe $batch= ', $batch);
-    $results = civicrm_api('Googlegroups', 'deletemember', array('version' => 3, 'group_id' => $groupID, 'member' => $batch));
-    // Finally we can delete the emails that we just processed from the mailchimp temp table.
-    CRM_Core_DAO::executeQuery(
-      "DELETE FROM tmp_googlegroups_g
-       WHERE NOT EXISTS (
-         SELECT email FROM tmp_googlegroups_c c WHERE c.email = tmp_googlegroups_g.email
-       );");
-    
+
+    if (!empty($batch)) {
+      $results = civicrm_api('Googlegroups', 'deletemember', array('version' => 3, 'group_id' => $groupID, 'member' => $batch));
+      // Finally we can delete the emails that we just processed from the mailchimp temp table.
+      CRM_Core_DAO::executeQuery(
+        "DELETE FROM tmp_googlegroups_g
+        WHERE NOT EXISTS (
+          SELECT email FROM tmp_googlegroups_c c WHERE c.email = tmp_googlegroups_g.email
+        );");
+    }
     static::updatePushStats($stats);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
@@ -246,19 +241,20 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
       $batch[] = $dao->email;
       $stats[$groupID]['added']++;
     }
-    if (!$batch) {
-      // Nothing to do
-      return CRM_Queue_Task::TASK_SUCCESS;
+    if (!empty($batch)) {
+      $results = civicrm_api('Googlegroups', 'subscribe', array('version' => 3, 'group_id' => $groupID, 'emails' => $batch, 'role' => 'MEMBER'));
     }
-    $results = civicrm_api('Googlegroups', 'subscribe', array('version' => 3, 'group_id' => $groupID, 'emails' => $batch, 'role' => 'MEMBER'));
-    
-    // Log the batch subscribe details
+    // Log batch subscribe details
     CRM_Core_Error::debug_var( 'Google Group batchSubscribe $batch= ', $batch);
     
     static::updatePushStats($stats);
+
     // Finally, finish up by removing the two temporary tables
     CRM_Core_DAO::executeQuery("DROP TABLE tmp_googlegroups_g;");
     CRM_Core_DAO::executeQuery("DROP TABLE tmp_googlegroups_c;");
+
+    $stats = GG::getStats();
+    CRM_Core_Error::debug_var("gg sync stats in the end", $stats);
 
     return CRM_Queue_Task::TASK_SUCCESS;
   }
@@ -279,6 +275,7 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
     $db = $dao->getDatabaseConnection();
     $insert = $db->prepare('INSERT INTO tmp_googlegroups_g VALUES(?, ?)');
     $googleGroupMembers = civicrm_api('Googlegroups', 'getmembers', array('version' => 3, 'group_id' => $groupID));
+    CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getmembers $googleGroupMembers', $googleGroupMembers);
     foreach ($googleGroupMembers['values'] as $memberId => $memberEmail) {
       $db->execute($insert, array($memberEmail, $memberId));
     }

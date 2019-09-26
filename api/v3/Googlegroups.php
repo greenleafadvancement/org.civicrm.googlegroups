@@ -42,8 +42,8 @@ function civicrm_api3_googlegroups_getgroups($params) {
         } 
         catch (Exception $e) {
           $errors = $e->getErrors();
-          //if ($errors[0]['message'] == 'Login Required') {
-          //}
+          CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getgroups exception $e', $e);
+          CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getgroups exception $errors', $errors);
           return [];
         }
       }
@@ -69,6 +69,9 @@ function civicrm_api3_googlegroups_getmembers($params) {
       } while($pageToken);
     } 
     catch (Exception $e) {
+      $errors = $e->getErrors();
+      CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getmembers exception $e', $e);
+      CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getmembers exception $errors', $errors);
       return [];
     }
   }
@@ -93,6 +96,9 @@ function civicrm_api3_googlegroups_deletemember($params) {
       $response = $batch->execute();
     } 
     catch (Exception $e) {
+      $errors = $e->getErrors();
+      CRM_Core_Error::debug_var('civicrm_api3_googlegroups_deletemember exception $e', $e);
+      CRM_Core_Error::debug_var('civicrm_api3_googlegroups_deletemember exception $errors', $errors);
       return [];
     }
   }
@@ -120,6 +126,9 @@ function civicrm_api3_googlegroups_subscribe($params) {
       $response = $batch->execute();
     } 
     catch (Exception $e) {
+      $errors = $e->getErrors();
+      CRM_Core_Error::debug_var('civicrm_api3_googlegroups_subscribe exception $e', $e);
+      CRM_Core_Error::debug_var('civicrm_api3_googlegroups_subscribe exception $errors', $errors);
       return [];
     }
   }
@@ -139,7 +148,8 @@ function civicrm_api3_googlegroups_sync($params) {
   }
 
   if ($result['is_error'] == 0) {
-    return civicrm_api3_create_success();
+    $stats = GG::getStats();
+    return civicrm_api3_create_success($stats, $params, 'googlegroups', 'sync');
   }
   else {
     return civicrm_api3_create_error();
