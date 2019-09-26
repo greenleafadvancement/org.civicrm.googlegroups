@@ -182,8 +182,6 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
    * Collect CiviCRM data into temporary working table.
    */
   static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $groupID) {
-
-    //$stats[$listID]['c_count'] = static::syncCollectCiviCRM($listID);
     $stats[$groupID]['c_count'] = static::syncCollectCiviCRM($groupID);
     static::updatePushStats($stats);
     return CRM_Queue_Task::TASK_SUCCESS;
@@ -242,7 +240,8 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
 
     $dao = CRM_Core_DAO::executeQuery( "SELECT * FROM tmp_googlegroups_c;");
     // Loop the $dao object to make a list of emails to subscribe/update
-    $batch = array();
+    $batch = [];
+    $stats = [$groupID => ['added' => 0]];
     while ($dao->fetch()) {
       $batch[] = $dao->email;
       $stats[$groupID]['added']++;
