@@ -18,10 +18,10 @@ class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
       $client->setAccessToken($result);
 
       if (array_key_exists('error', $result)) {
-        CRM_Core_Session::setStatus(ts('Unable to establish connection with google groups. Make sure credentials are correct.'), ts('Something Went Wrong!'), 'error');
+        CRM_Core_Session::setStatus(ts('Could not authorize connection with google. Make sure credentials are correct.'), ts('Something Went Wrong!'), 'error');
       } else {
         GG::setAccessToken($client->getAccessToken());
-        CRM_Core_Session::setStatus(ts('Connection with Google Groups was successfully established'), ts('Success'), 'success');
+        CRM_Core_Session::setStatus(ts('Connection with Google was successfully authorized.'), ts('Success'), 'success');
       }
       CRM_Utils_System::redirect(CRM_Utils_System::url("civicrm/googlegroups/settings", 'reset=1'));
     }
