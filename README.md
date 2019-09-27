@@ -47,25 +47,25 @@ cv en googlegroups
 ## G Suite Setup: Enabling API, Creating Project, OAuth and Consent 
 
 * Enable the API access from the Admin console in order to make requests to the Directory API. To enable the API, log in to your admin account (at admin.google.com) and select Security. If you do not see Security listed, select More controls and then Security from the options shown in the gray box. 
-[image](images/admin-console.png)
+[image](/images/admin-console.png)
 
 * Select API reference, and then select the checkbox to Enable API access. Save your changes.
-[image](images/enable-api.png)
+[image](/images/enable-api.png)
 
 * Set up a new project in the [Google APIs Console](https://code.google.com/apis/console) 
-[image](images/new-project.png)
+[image](/images/new-project.png)
 
 * Activate Admin SDK service for the project created. 
-[image](images/activate-admin-sdk.png)
+[image](/images/activate-admin-sdk.png)
 
 * Create OAuth consent screen.
-[image](images/oauth-consent.png)
+[image](/images/oauth-consent.png)
 
 * Create authorization credentials. Open the Credentials page in the API Console. Click Create credentials > OAuth client ID. 
-[image](images/create-credentials.png)
+[image](/images/create-credentials.png)
 
 * Complete the form. Set the application type to Web application.
-[image](images/create-oauth-client-id.png)
+[image](/images/create-oauth-client-id.png)
 
 ## Extension Setup
 
