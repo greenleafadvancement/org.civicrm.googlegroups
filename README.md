@@ -94,3 +94,6 @@ B. Your setup is a local one and not accessible to public.
 Sync is only one way - from CiviCRM to GoogleGroups.
 
 ## Credits
+
+* Original extension (uk.co.vedaconsulting.googlegroup) development by Veda NFP Consulting Ltd (https://vedaconsulting.co.uk/) supporting CiviCRM versions upto v4.6.
+* Rewrite for CiviCRM v5.x funded by Greenleaf Advancement (https://greenleafadvancement.com) and Joshua Gowans (https://civicrm.org), developed by Deepak Srivastava (https://mountev.co.uk).
