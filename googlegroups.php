@@ -35,10 +35,10 @@ function googlegroups_civicrm_install() {
 
   $params = array(
     'sequential'    => 1,
-    'name'          => 'Google Group Sync',
-    'description'   => 'Sync contacts between CiviCRM and Google Group',
+    'name'          => 'Google Groups Sync',
+    'description'   => 'Sync contacts between CiviCRM and Google Groups',
     'run_frequency' => 'Daily',
-    'api_entity'    => 'Googlegroup',
+    'api_entity'    => 'Googlegroups',
     'api_action'    => 'sync',
     'is_active'     => 0,
   );

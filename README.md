@@ -67,6 +67,7 @@ cv en googlegroups
 * Complete the form. Set the application type to Web application.
 ![Screenshot](/images/create-oauth-client-id.png)
 
+
 ## Extension Setup
 
 * Goto Administer >> System Settings >> Google Groups Settings.
@@ -80,6 +81,13 @@ cv en googlegroups
 * Save would redirect to google authorization (OAuth) prompt. Once authorized it should redirect back to extension's Google Groups Settings screen. If it does not, either: 
 A. Redirect uri has not been setup correctly OR 
 B. Your setup is a local one and not accessible to public.
+
+* Once setup, CiviCRM group add or edit screen would render a Google Group dropdown. Select a matching google group. Sync process will make sure that members of google groups are synced from that of matching Civi Group.
+
+* Use Contacts >> Google Groups Sync to run the sync process manually.
+
+* To automate the sync, enable the 'Google Groups Sync (Daily)' job on Administer >> System Settings >> Scheduled Jobs screen.
+
 
 ## Known Issues
 
