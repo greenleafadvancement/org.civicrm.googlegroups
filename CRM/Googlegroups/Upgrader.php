@@ -131,4 +131,19 @@ class CRM_Googlegroups_Upgrader extends CRM_Googlegroups_Upgrader_Base {
     return TRUE;
   } // */
 
+  public function upgrade_201() {
+    $result = civicrm_api3('LocationType', 'get', [
+      'sequential' => 1,
+      'name' => "Google",
+    ]);
+    if (empty($result['id'])) {
+      $result = civicrm_api3('LocationType', 'create', [
+        'name' => "Google",
+        'display_name' => "Google",
+        'description' => "Used for Google Groups Sync",
+        'is_active' => 1,
+      ]);
+    }
+    return TRUE;
+  }
 }

@@ -4,7 +4,7 @@ use CRM_Googlegroups_Utils as GG;
 
 /**
  * @file
- * This provides the Sync Push from CiviCRM to Mailchimp form.
+ * This provides the Sync Push from CiviCRM to Google Groups.
  */
 
 class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
@@ -128,14 +128,14 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
   }
 
   /**
-   * Set up (sub)queue for syncing a Mailchimp List.
+   * Set up (sub)queue for syncing a Google Groups List.
    */
   static function syncPushList(CRM_Queue_TaskContext $ctx, $groupID, $identifier) {
 
     // Split the work into parts:
     // @todo 'force' method not implemented here.
 
-    // Add the Mailchimp collect data task to the queue
+    // Add the Google Groups collect data task to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Googlegroups_Form_Sync', 'syncPushCollectGoogleGroups'),
       array($groupID),
@@ -167,7 +167,7 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
   }
 
   /**
-   * Collect Mailchimp data into temporary working table.
+   * Collect Google Groups data into temporary working table.
    */
   static function syncPushCollectGoogleGroups(CRM_Queue_TaskContext $ctx, $groupID) {
     $stats[$groupID]['googlegroups_count'] = static::syncCollectGoogle($groupID);
@@ -186,7 +186,7 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
   }
 
   /**
-   * Unsubscribe contacts that are subscribed at Mailchimp but not in our list.
+   * Unsubscribe contacts that are subscribed at Google Groups but not in our list.
    */
   static function syncPushRemove(CRM_Queue_TaskContext $ctx, $groupID) {
     $dao = CRM_Core_DAO::executeQuery(
@@ -220,7 +220,7 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
   }
 
   /**
-   * Batch update Mailchimp with new contacts that need to be subscribed, or have changed data.
+   * Batch update Google Groups with new contacts that need to be subscribed, or have changed data.
    *
    * This also does the clean-up tasks of removing the temporary tables.
    */
@@ -316,16 +316,14 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
         $contact->id = $groupContact->contact_id;
         $contact->is_deleted = 0;
         $contact->find(TRUE);
-
-        // Find their primary (bulk) email
-        $email = new CRM_Core_BAO_Email();
-        $email->contact_id = $groupContact->contact_id;
-        $email->is_primary = TRUE;
-        $email->find(TRUE);
-
-        // If no email, it's like they're not there.
-        if (!$email->email || $email->on_hold || $contact->is_opt_out || $contact->do_not_email) {
+        if ($contact->is_opt_out || $contact->do_not_email) {
           //@todo update stats.
+          continue;
+        }
+
+        $email = self::getEmailObj($groupContact->contact_id);
+        // If no email, it's like they're not there.
+        if (!$email) {
           continue;
         }
 
@@ -340,6 +338,36 @@ class CRM_Googlegroups_Form_Sync extends CRM_Core_Form {
     $dao = CRM_Core_DAO::executeQuery("SELECT COUNT(*) c  FROM tmp_googlegroups_c");
     $dao->fetch();
     return $dao->c;
+  }
+
+  /**
+   * Check for any google emails. If no google emails, return primary.
+   *
+   */
+  static function getEmailObj($cid) {
+    $gEmail = new CRM_Core_BAO_Email();
+    $gEmail->contact_id = $cid;
+    $gEmail->on_hold = 0;
+
+    // return any google email
+    $locationTypes = CRM_Core_PseudoConstant::get('CRM_Core_DAO_Address', 'location_type_id');
+    $gLocTypeId    = array_search('Google', $locationTypes);
+    if ($gLocTypeId) {
+      $gEmail->location_type_id = $gLocTypeId;
+      if ($gEmail->find(TRUE) && $gEmail->email) {
+        return $gEmail;
+      }
+    }
+
+    // return primary email, if no google email
+    $pEmail = new CRM_Core_BAO_Email();
+    $pEmail->contact_id = $cid;
+    $pEmail->on_hold = 0;
+    $pEmail->is_primary = TRUE;
+    if ($pEmail->find(TRUE) && $pEmail->email) {
+      return $pEmail;
+    }
+    return FALSE;
   }
 
   /**
