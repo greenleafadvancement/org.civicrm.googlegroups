@@ -14,8 +14,8 @@
     <url desc="Support">https://greenleafadvancement.com/</url>
     <url desc="Licensing">http://www.gnu.org/licenses/agpl-3.0.html</url>
   </urls>
-  <releaseDate>2019-09-10</releaseDate>
-  <version>2.0</version>
+  <releaseDate>2020-03-04</releaseDate>
+  <version>2.0.1</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>5.0</ver>

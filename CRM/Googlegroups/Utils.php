@@ -45,7 +45,7 @@ class CRM_Googlegroups_Utils {
   static function getClient($initTokenIfRequired = TRUE) {
     $params = self::getSettings();
 
-    require_once 'vendor/autoload.php';
+    include_once __DIR__ . '/../../vendor/autoload.php';
     $client = new Google_Client();
     $client->setClientId($params['client_id']);
     $client->setClientSecret($params['client_secret']);
