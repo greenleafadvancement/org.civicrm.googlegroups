@@ -67,6 +67,9 @@ class CRM_Googlegroups_Utils {
       }
       // If there is no previous token or it's expired.
       if ($client->isAccessTokenExpired()) {
+        // empty access token, as what's present is expired. And we use this info
+        // to conclude on settings page to say it's authorized or not.
+        self::setAccessToken('');
         // Request authorization from the user.
         $authUrl = $client->createAuthUrl();
         header('Location: ' . filter_var($authUrl, FILTER_SANITIZE_URL));

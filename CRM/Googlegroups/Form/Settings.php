@@ -45,7 +45,7 @@ class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
     $this->addButtons(array(
       array(
         'type' => 'submit',
-        'name' => !empty($accessToken) ? E::ts('Re-Authorize if Required') : E::ts('Authorize'),
+        'name' => !empty($accessToken) ? E::ts('Authorized (Click to Re-Authorize)') : E::ts('Click to Authorize'),
         'isDefault' => TRUE,
       ),
     ));
@@ -76,8 +76,12 @@ class CRM_Googlegroups_Form_Settings extends CRM_Core_Form {
     GG::setSettings($params);
     // init token if required.
     $client = GG::getClient();
-    // Being at this point means that we weren't redirected because of accessToken being valid.
-    CRM_Core_Session::setStatus(ts('Already authorized.'), ts('Success'), 'success');
+
+    if ($client->isAccessTokenExpired()) {
+      CRM_Core_Session::setStatus(ts('Authorization failed.'), ts('Error'), 'error');
+    } else {
+      CRM_Core_Session::setStatus(ts('Access Token Refreshed.'), ts('Success'), 'success');
+    }
 
     parent::postProcess();
   }
