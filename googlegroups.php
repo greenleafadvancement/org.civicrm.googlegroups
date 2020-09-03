@@ -208,7 +208,6 @@ function googlegroups_civicrm_buildForm($formName, &$form) {
   )) {
     $lists = [];
     $lists = civicrm_api3('Googlegroups', 'getgroups', []);
-    CRM_Core_Error::debug_var('$lists', $lists);
     if (!empty($lists['values'])) {
       $form->add('select', 'googlegroup', ts('Google Group'), array('' => '- select -') + $lists['values'], FALSE );
       $templatePath = realpath(dirname(__FILE__)."/templates/CRM/Googlegroups/Form");

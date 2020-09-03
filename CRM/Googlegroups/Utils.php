@@ -42,7 +42,7 @@ class CRM_Googlegroups_Utils {
     return CRM_Utils_Array::value('domains', $params, []);
   }
 
-  static function getClient($initTokenIfRequired = TRUE) {
+  static function getClient($initTokenIfRequired = TRUE, $regenRefreshToken = FALSE) {
     $params = self::getSettings();
 
     include_once __DIR__ . '/../../vendor/autoload.php';
@@ -51,11 +51,12 @@ class CRM_Googlegroups_Utils {
     $client->setClientSecret($params['client_secret']);
     $client->setApplicationName('CiviCRM GoogleGroups Extension');
     $client->setAccessType('offline');
+    if ($regenRefreshToken) {
+      // We expect this to be done via settings screen only.
+      // Using "consent" ensures that your application always receives a refresh token.
+      $client->setPrompt("consent");
+    }
     $client->addScope(Google_Service_Directory::ADMIN_DIRECTORY_GROUP);
-    // Using "consent" ensures that your application always receives a refresh token.
-    // If you are not using offline access, you can omit this.
-    // This is not really working.
-    // $client->setApprovalPrompt("select_account consent");
 
     $redirectUrl = CRM_Utils_System::url('civicrm/googlegroups/settings', 'reset=1',  TRUE, NULL, FALSE, TRUE, TRUE);
     $client->setRedirectUri($redirectUrl);
