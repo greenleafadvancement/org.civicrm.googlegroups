@@ -41,7 +41,7 @@ function civicrm_api3_googlegroups_getgroups($params) {
           } while($pageToken);
         } 
         catch (Exception $e) {
-          $errors = $e->getErrors();
+          $errors = $e->getMessage();
           CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getgroups exception $e', $e);
           CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getgroups exception $errors', $errors);
           return [];
@@ -69,7 +69,7 @@ function civicrm_api3_googlegroups_getmembers($params) {
       } while($pageToken);
     } 
     catch (Exception $e) {
-      $errors = $e->getErrors();
+      $errors = $e->getMessage();
       CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getmembers exception $e', $e);
       CRM_Core_Error::debug_var('civicrm_api3_googlegroups_getmembers exception $errors', $errors);
       return [];
@@ -87,8 +87,8 @@ function civicrm_api3_googlegroups_deletemember($params) {
   $client = GG::getClient();
   if (!$client->isAccessTokenExpired()) {
     $client->setUseBatch(TRUE);
-    $batch = new Google_Http_Batch($client);
     $service = new Google_Service_Directory($client);
+    $batch = $service->createBatch();
     try {
       foreach ($params['member'] as $key => $member) {
         $batch->add($service->members->delete($params['group_id'], $member));
@@ -96,7 +96,7 @@ function civicrm_api3_googlegroups_deletemember($params) {
       $response = $batch->execute();
     } 
     catch (Exception $e) {
-      $errors = $e->getErrors();
+      $errors = $e->getMessage();
       CRM_Core_Error::debug_var('civicrm_api3_googlegroups_deletemember exception $e', $e);
       CRM_Core_Error::debug_var('civicrm_api3_googlegroups_deletemember exception $errors', $errors);
       return [];
@@ -114,8 +114,8 @@ function civicrm_api3_googlegroups_subscribe($params) {
   $client = GG::getClient();
   if (!$client->isAccessTokenExpired()) {
     $client->setUseBatch(TRUE);
-    $batch = new Google_Http_Batch($client);
     $service = new Google_Service_Directory($client);
+    $batch = $service->createBatch();
     try {
       foreach ($params['emails'] as $email) {
         $member = new Google_Service_Directory_Member();
@@ -126,7 +126,7 @@ function civicrm_api3_googlegroups_subscribe($params) {
       $response = $batch->execute();
     } 
     catch (Exception $e) {
-      $errors = $e->getErrors();
+      $errors = $e->getMessage();
       CRM_Core_Error::debug_var('civicrm_api3_googlegroups_subscribe exception $e', $e);
       CRM_Core_Error::debug_var('civicrm_api3_googlegroups_subscribe exception $errors', $errors);
       return [];
