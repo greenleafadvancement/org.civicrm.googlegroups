@@ -10,6 +10,7 @@ Features:
 * Adds a scheduled job to automatically sync once per day.
 * Requires only one time Authorization, and works based on long lived Refresh Token.
 * Supports multiple domains within a Google Apps system.
+* An email other than home/work could be used for the sync. Email with location type "Google" is given preference over primary email.
 
 The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
