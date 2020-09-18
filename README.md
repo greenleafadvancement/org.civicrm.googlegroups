@@ -23,7 +23,7 @@ The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
 ## Installation (Web UI)
 
-TODO:
+TODO: *this extension is currently not available to install through the web ui*
 
 ## Installation (CLI, Zip)
 
@@ -32,7 +32,7 @@ install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
 cd <extension-dir>
-cv dl org.civicrm.googlegroups@https://github.com/FIXME/org.civicrm.googlegroups/archive/master.zip
+cv dl org.civicrm.googlegroups@https://github.com/greenleafadvancement/org.civicrm.googlegroups/archive/master.zip
 ```
 
 ## Installation (CLI, Git)
@@ -41,7 +41,7 @@ Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) 
 install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
-git clone https://github.com/FIXME/org.civicrm.googlegroups.git
+git clone https://github.com/greenleafadvancement/org.civicrm.googlegroups.git
 cv en googlegroups
 ```
 
