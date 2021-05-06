@@ -23,9 +23,9 @@
   <comments>
     <ul>
       <li>Original extension (uk.co.vedaconsulting.googlegroup) development by Veda NFP Consulting Ltd (https://vedaconsulting.co.uk/) supporting CiviCRM versions upto v4.6.</li>
-     <li>Rewrite for CiviCRM v5.x funded by Greenleaf Advancement (https://greenleafadvancement.com) and Joshua Gowans (https://civicrm.org), developed by Deepak Srivastava (https://mountev.co.uk).</li>
+      <li>Rewrite for CiviCRM v5.x funded by Greenleaf Advancement (https://greenleafadvancement.com) and Joshua Gowans (https://civicrm.org), developed by Deepak Srivastava (https://mountev.co.uk).</li>
     </ul>
-</comments>
+  </comments>
   <civix>
     <namespace>CRM/Googlegroups</namespace>
   </civix>
