@@ -1,6 +1,7 @@
 # org.civicrm.googlegroups
 
-![Screenshot](/images/extension.png)
+![Screenshot](/images/civi-sync-stats.png)
+![Screenshot](/images/google-groups.png)
 
 The extension uses Google's directory API to sync Google Groups member list with that of contacts in CiviCRM Groups.
 The extension supports latest version of CiviCRM ver 5.x and based on Google Client Library v2.x.
@@ -45,29 +46,26 @@ git clone https://github.com/greenleafadvancement/org.civicrm.googlegroups.git
 cv en googlegroups
 ```
 
-## G Suite Setup: Enabling API, Creating Project, OAuth and Consent 
+## G Suite Setup: Enabling API, Creating Project, OAuth and Consent
 
-* Enable the API access from the Admin console in order to make requests to the Directory API. To enable the API, log in to your admin account (at admin.google.com) and select Security. If you do not see Security listed, select More controls and then Security from the options shown in the gray box. 
-![Screenshot](/images/admin-console.png)
-
-* Select API reference, and then select the checkbox to Enable API access. Save your changes.
-![Screenshot](/images/enable-api.png)
-
-* Set up a new project in the [Google APIs Console](https://code.google.com/apis/console) 
+* Before you can begin, you need to create a new project in the [Google APIs Console](https://code.google.com/apis/console).
 ![Screenshot](/images/new-project.png)
 
-* Activate Admin SDK service for the project created. 
-![Screenshot](/images/activate-admin-sdk.png)
+* Enable the API access from Google Cloud Console in order to make requests to the Directory API. To enable the API, At the top-left, click Menu menu > APIs & Services > Library, and enable “Admin SDK API”.
+![Screenshot](/images/enable-api-1.png)
+![Screenshot](/images/enable-api-2.png)
+The enabled api should now be visible in "Enabled APIs and Services" section.
+![Screenshot](/images/enable-api-3.png)
 
 * Create OAuth consent screen.
-![Screenshot](/images/oauth-consent.png)
+![Screenshot](/images/oauth-consent-1.png)
+![Screenshot](/images/oauth-consent-2.png)
 
-* Create authorization credentials. Open the Credentials page in the API Console. Click Create credentials > OAuth client ID. 
-![Screenshot](/images/create-credentials.png)
-
-* Complete the form. Set the application type to Web application.
-![Screenshot](/images/create-oauth-client-id.png)
-
+* Create authorization credentials. Open the Credentials section from "APIs & Services". Click Create credentials > OAuth client ID.
+![Screenshot](/images/create-credentials-1.png)
+![Screenshot](/images/create-credentials-2.png)
+![Screenshot](/images/create-credentials-3.png)
+![Screenshot](/images/credentials-display.png)
 
 ## Extension Setup
 
@@ -79,8 +77,8 @@ cv en googlegroups
 
 * Enter GSuite domain. For multiple domains enter comma separated domains.
 
-* Save would redirect to google authorization (OAuth) prompt. Once authorized it should redirect back to extension's Google Groups Settings screen. If it does not, either: 
-A. Redirect uri has not been setup correctly OR 
+* Save would redirect to google authorization (OAuth) prompt. Once authorized it should redirect back to extension's Google Groups Settings screen. If it does not, either:
+A. Redirect uri has not been setup correctly OR
 B. Your setup is a local one and not accessible to public.
 
 * Once setup, CiviCRM group add or edit screen would render a Google Group dropdown. Select a matching google group. Sync process will make sure that members of google groups are synced from that of matching Civi Group.
@@ -89,6 +87,7 @@ B. Your setup is a local one and not accessible to public.
 
 * To automate the sync, enable the 'Google Groups Sync (Daily)' job on Administer >> System Settings >> Scheduled Jobs screen.
 
+![Screenshot](/images/civi-settings.png)
 
 ## Known Issues
 
