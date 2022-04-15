@@ -1,6 +1,8 @@
 # org.civicrm.googlegroups
 
-![Screenshot](/images/civi-sync-stats.png)
+<img alt="Screenshot" src="/images/civi-sync-stats.png" width="50%"/>
+
+Google Groups
 ![Screenshot](/images/google-groups.png)
 
 The extension uses Google's directory API to sync Google Groups member list with that of contacts in CiviCRM Groups.
@@ -52,10 +54,10 @@ cv en googlegroups
 ![Screenshot](/images/new-project.png)
 
 * Enable the API access from Google Cloud Console in order to make requests to the Directory API. To enable the API, At the top-left, click Menu menu > APIs & Services > Library, and enable “Admin SDK API”.
-![Screenshot](/images/enable-api-1.png)
-![Screenshot](/images/enable-api-2.png)
+<img alt="Screenshot" src="/images/enable-api-1.png" width="50%"/>
+<img alt="Screenshot" src="/images/enable-api-2.png" width="50%"/>
 The enabled api should now be visible in "Enabled APIs and Services" section.
-![Screenshot](/images/enable-api-3.png)
+<img alt="Screenshot" src="/images/enable-api-3.png" width="80%"/>
 
 * Create OAuth consent screen.
 ![Screenshot](/images/oauth-consent-1.png)
