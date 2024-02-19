@@ -14,6 +14,7 @@ namespace Monolog\Formatter;
 use Monolog\DateTimeImmutable;
 use Monolog\Utils;
 use Throwable;
+use Monolog\LogRecord;
 
 /**
  * Normalizes incoming records to remove objects/resources so it's easier to dump to various targets
@@ -24,14 +25,15 @@ class NormalizerFormatter implements FormatterInterface
 {
     public const SIMPLE_DATE = "Y-m-d\TH:i:sP";
 
-    protected $dateFormat;
-    protected $maxNormalizeDepth = 9;
-    protected $maxNormalizeItemCount = 1000;
+    protected string $dateFormat;
+    protected int $maxNormalizeDepth = 9;
+    protected int $maxNormalizeItemCount = 1000;
 
-    private $jsonEncodeOptions = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION;
+    private int $jsonEncodeOptions = Utils::DEFAULT_JSON_FLAGS;
 
     /**
      * @param string|null $dateFormat The format of the timestamp: one supported by DateTime::format
+     * @throws \RuntimeException If the function json_encode does not exist
      */
     public function __construct(?string $dateFormat = null)
     {
@@ -42,15 +44,25 @@ class NormalizerFormatter implements FormatterInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
-    public function format(array $record)
+    public function format(LogRecord $record)
     {
-        return $this->normalize($record);
+        return $this->normalizeRecord($record);
     }
 
     /**
-     * {@inheritdoc}
+     * Normalize an arbitrary value to a scalar|array|null
+     *
+     * @return null|scalar|array<mixed[]|scalar|null>
+     */
+    public function normalizeValue(mixed $data): mixed
+    {
+        return $this->normalize($data);
+    }
+
+    /**
+     * @inheritDoc
      */
     public function formatBatch(array $records)
     {
@@ -61,6 +73,21 @@ class NormalizerFormatter implements FormatterInterface
         return $records;
     }
 
+    public function getDateFormat(): string
+    {
+        return $this->dateFormat;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setDateFormat(string $dateFormat): self
+    {
+        $this->dateFormat = $dateFormat;
+
+        return $this;
+    }
+
     /**
      * The maximum number of normalization levels to go through
      */
@@ -69,6 +96,9 @@ class NormalizerFormatter implements FormatterInterface
         return $this->maxNormalizeDepth;
     }
 
+    /**
+     * @return $this
+     */
     public function setMaxNormalizeDepth(int $maxNormalizeDepth): self
     {
         $this->maxNormalizeDepth = $maxNormalizeDepth;
@@ -84,6 +114,9 @@ class NormalizerFormatter implements FormatterInterface
         return $this->maxNormalizeItemCount;
     }
 
+    /**
+     * @return $this
+     */
     public function setMaxNormalizeItemCount(int $maxNormalizeItemCount): self
     {
         $this->maxNormalizeItemCount = $maxNormalizeItemCount;
@@ -93,23 +126,40 @@ class NormalizerFormatter implements FormatterInterface
 
     /**
      * Enables `json_encode` pretty print.
+     *
+     * @return $this
      */
     public function setJsonPrettyPrint(bool $enable): self
     {
         if ($enable) {
             $this->jsonEncodeOptions |= JSON_PRETTY_PRINT;
         } else {
-            $this->jsonEncodeOptions ^= JSON_PRETTY_PRINT;
+            $this->jsonEncodeOptions &= ~JSON_PRETTY_PRINT;
         }
 
         return $this;
     }
 
     /**
-     * @param  mixed                      $data
-     * @return int|bool|string|null|array
+     * Provided as extension point
+     *
+     * Because normalize is called with sub-values of context data etc, normalizeRecord can be
+     * extended when data needs to be appended on the record array but not to other normalized data.
+     *
+     * @return array<mixed[]|scalar|null>
      */
-    protected function normalize($data, int $depth = 0)
+    protected function normalizeRecord(LogRecord $record): array
+    {
+        /** @var array<mixed> $normalized */
+        $normalized = $this->normalize($record->toArray());
+
+        return $normalized;
+    }
+
+    /**
+     * @return null|scalar|array<mixed[]|scalar|null>
+     */
+    protected function normalize(mixed $data, int $depth = 0): mixed
     {
         if ($depth > $this->maxNormalizeDepth) {
             return 'Over ' . $this->maxNormalizeDepth . ' levels deep, aborting normalization';
@@ -154,17 +204,18 @@ class NormalizerFormatter implements FormatterInterface
             }
 
             if ($data instanceof \JsonSerializable) {
+                /** @var null|scalar|array<mixed[]|scalar|null> $value */
                 $value = $data->jsonSerialize();
+            } elseif (\get_class($data) === '__PHP_Incomplete_Class') {
+                $accessor = new \ArrayObject($data);
+                $value = (string) $accessor['__PHP_Incomplete_Class_Name'];
             } elseif (method_exists($data, '__toString')) {
+                /** @var string $value */
                 $value = $data->__toString();
             } else {
                 // the rest is normalized by json encoding and decoding it
-                $encoded = $this->toJson($data, true);
-                if ($encoded === false) {
-                    $value = 'JSON_ERROR';
-                } else {
-                    $value = json_decode($encoded, true);
-                }
+                /** @var null|scalar|array<mixed[]|scalar|null> $value */
+                $value = json_decode($this->toJson($data, true), true);
             }
 
             return [Utils::getClass($data) => $value];
@@ -178,10 +229,14 @@ class NormalizerFormatter implements FormatterInterface
     }
 
     /**
-     * @return array
+     * @return mixed[]
      */
     protected function normalizeException(Throwable $e, int $depth = 0)
     {
+        if ($depth > $this->maxNormalizeDepth) {
+            return ['Over ' . $this->maxNormalizeDepth . ' levels deep, aborting normalization'];
+        }
+
         if ($e instanceof \JsonSerializable) {
             return (array) $e->jsonSerialize();
         }
@@ -189,7 +244,7 @@ class NormalizerFormatter implements FormatterInterface
         $data = [
             'class' => Utils::getClass($e),
             'message' => $e->getMessage(),
-            'code' => $e->getCode(),
+            'code' => (int) $e->getCode(),
             'file' => $e->getFile().':'.$e->getLine(),
         ];
 
@@ -203,18 +258,22 @@ class NormalizerFormatter implements FormatterInterface
             }
 
             if (isset($e->detail)) {
-                $data['detail'] = $e->detail;
+                if (is_string($e->detail)) {
+                    $data['detail'] = $e->detail;
+                } elseif (is_object($e->detail) || is_array($e->detail)) {
+                    $data['detail'] = $this->toJson($e->detail, true);
+                }
             }
         }
 
         $trace = $e->getTrace();
         foreach ($trace as $frame) {
-            if (isset($frame['file'])) {
+            if (isset($frame['file'], $frame['line'])) {
                 $data['trace'][] = $frame['file'].':'.$frame['line'];
             }
         }
 
-        if ($previous = $e->getPrevious()) {
+        if (($previous = $e->getPrevious()) instanceof \Throwable) {
             $data['previous'] = $this->normalizeException($previous, $depth + 1);
         }
 
@@ -226,133 +285,14 @@ class NormalizerFormatter implements FormatterInterface
      *
      * @param  mixed             $data
      * @throws \RuntimeException if encoding fails and errors are not ignored
-     * @return string|bool
+     * @return string            if encoding fails and ignoreErrors is true 'null' is returned
      */
-    protected function toJson($data, bool $ignoreErrors = false)
+    protected function toJson($data, bool $ignoreErrors = false): string
     {
-        // suppress json_encode errors since it's twitchy with some inputs
-        if ($ignoreErrors) {
-            return @$this->jsonEncode($data);
-        }
-
-        $json = $this->jsonEncode($data);
-
-        if ($json === false) {
-            $json = $this->handleJsonError(json_last_error(), $data);
-        }
-
-        return $json;
+        return Utils::jsonEncode($data, $this->jsonEncodeOptions, $ignoreErrors);
     }
 
-    /**
-     * @param  mixed       $data
-     * @return string|bool JSON encoded data or false on failure
-     */
-    private function jsonEncode($data)
-    {
-        return json_encode($data, $this->jsonEncodeOptions);
-    }
-
-    /**
-     * Handle a json_encode failure.
-     *
-     * If the failure is due to invalid string encoding, try to clean the
-     * input and encode again. If the second encoding attempt fails, the
-     * initial error is not encoding related or the input can't be cleaned then
-     * raise a descriptive exception.
-     *
-     * @param  int               $code return code of json_last_error function
-     * @param  mixed             $data data that was meant to be encoded
-     * @throws \RuntimeException if failure can't be corrected
-     * @return string            JSON encoded data after error correction
-     */
-    private function handleJsonError(int $code, $data): string
-    {
-        if ($code !== JSON_ERROR_UTF8) {
-            $this->throwEncodeError($code, $data);
-        }
-
-        if (is_string($data)) {
-            $this->detectAndCleanUtf8($data);
-        } elseif (is_array($data)) {
-            array_walk_recursive($data, [$this, 'detectAndCleanUtf8']);
-        } else {
-            $this->throwEncodeError($code, $data);
-        }
-
-        $json = $this->jsonEncode($data);
-
-        if ($json === false) {
-            $this->throwEncodeError(json_last_error(), $data);
-        }
-
-        return $json;
-    }
-
-    /**
-     * Throws an exception according to a given code with a customized message
-     *
-     * @param  int               $code return code of json_last_error function
-     * @param  mixed             $data data that was meant to be encoded
-     * @throws \RuntimeException
-     */
-    private function throwEncodeError(int $code, $data)
-    {
-        switch ($code) {
-            case JSON_ERROR_DEPTH:
-                $msg = 'Maximum stack depth exceeded';
-                break;
-            case JSON_ERROR_STATE_MISMATCH:
-                $msg = 'Underflow or the modes mismatch';
-                break;
-            case JSON_ERROR_CTRL_CHAR:
-                $msg = 'Unexpected control character found';
-                break;
-            case JSON_ERROR_UTF8:
-                $msg = 'Malformed UTF-8 characters, possibly incorrectly encoded';
-                break;
-            default:
-                $msg = 'Unknown error';
-        }
-
-        throw new \RuntimeException('JSON encoding failed: '.$msg.'. Encoding: '.var_export($data, true));
-    }
-
-    /**
-     * Detect invalid UTF-8 string characters and convert to valid UTF-8.
-     *
-     * Valid UTF-8 input will be left unmodified, but strings containing
-     * invalid UTF-8 codepoints will be reencoded as UTF-8 with an assumed
-     * original encoding of ISO-8859-15. This conversion may result in
-     * incorrect output if the actual encoding was not ISO-8859-15, but it
-     * will be clean UTF-8 output and will not rely on expensive and fragile
-     * detection algorithms.
-     *
-     * Function converts the input in place in the passed variable so that it
-     * can be used as a callback for array_walk_recursive.
-     *
-     * @param mixed &$data Input to check and convert if needed
-     * @private
-     */
-    public function detectAndCleanUtf8(&$data)
-    {
-        if (is_string($data) && !preg_match('//u', $data)) {
-            $data = preg_replace_callback(
-                '/[\x80-\xFF]+/',
-                function ($m) {
-                    return utf8_encode($m[0]);
-                },
-                $data
-            );
-            $data = str_replace(
-                ['¤', '¦', '¨', '´', '¸', '¼', '½', '¾'],
-                ['€', 'Š', 'š', 'Ž', 'ž', 'Œ', 'œ', 'Ÿ'],
-                $data
-            );
-        }
-    }
-
-    protected function formatDate(\DateTimeInterface $date)
+    protected function formatDate(\DateTimeInterface $date): string
     {
         // in case the date format isn't custom then we defer to the custom DateTimeImmutable
         // formatting logic, which will pick the right format based on whether useMicroseconds is on
@@ -363,13 +303,23 @@ class NormalizerFormatter implements FormatterInterface
         return $date->format($this->dateFormat);
     }
 
-    protected function addJsonEncodeOption($option)
+    /**
+     * @return $this
+     */
+    public function addJsonEncodeOption(int $option): self
     {
         $this->jsonEncodeOptions |= $option;
+
+        return $this;
     }
 
-    protected function removeJsonEncodeOption($option)
+    /**
+     * @return $this
+     */
+    public function removeJsonEncodeOption(int $option): self
     {
-        $this->jsonEncodeOptions ^= $option;
+        $this->jsonEncodeOptions &= ~$option;
+
+        return $this;
     }
 }
