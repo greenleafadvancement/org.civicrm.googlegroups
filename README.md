@@ -50,24 +50,14 @@ cv en googlegroups
 
 ## G Suite Setup: Enabling API, Creating Project, OAuth and Consent
 
-* Before you can begin, you need to create a new project in the [Google APIs Console](https://code.google.com/apis/console).
-![Screenshot](/images/new-project.png)
+* Before you can begin, you need to create a new project in the [Google APIs Console](https://code.google.com/apis/console). ![Screenshot](/images/new-project.png)
+  
+* Enable the API access from Google Cloud Console in order to make requests to the Directory API. To enable the API, At the top-left, click Menu menu > APIs & Services > Library, and enable “Admin SDK API”. <img alt="Screenshot" src="/images/enable-api-1.png" width="50%"/> <img alt="Screenshot" src="/images/enable-api-2.png" width="50%"/>
+* The enabled api should now be visible in "Enabled APIs and Services" section. <img alt="Screenshot" src="/images/enable-api-3.png" width="80%"/>
 
-* Enable the API access from Google Cloud Console in order to make requests to the Directory API. To enable the API, At the top-left, click Menu menu > APIs & Services > Library, and enable “Admin SDK API”.
-<img alt="Screenshot" src="/images/enable-api-1.png" width="50%"/>
-<img alt="Screenshot" src="/images/enable-api-2.png" width="50%"/>
-The enabled api should now be visible in "Enabled APIs and Services" section.
-<img alt="Screenshot" src="/images/enable-api-3.png" width="80%"/>
+* Create OAuth consent screen. ![Screenshot](/images/oauth-consent-1.png) ![Screenshot](/images/oauth-consent-2.png)
 
-* Create OAuth consent screen.
-![Screenshot](/images/oauth-consent-1.png)
-![Screenshot](/images/oauth-consent-2.png)
-
-* Create authorization credentials. Open the Credentials section from "APIs & Services". Click Create credentials > OAuth client ID.
-![Screenshot](/images/create-credentials-1.png)
-![Screenshot](/images/create-credentials-2.png)
-![Screenshot](/images/create-credentials-3.png)
-![Screenshot](/images/credentials-display.png)
+* Create authorization credentials. Open the Credentials section from "APIs & Services". Click Create credentials > OAuth client ID. ![Screenshot](/images/create-credentials-1.png) ![Screenshot](/images/create-credentials-2.png) ![Screenshot](/images/create-credentials-3.png) ![Screenshot](/images/credentials-display.png)
 
 ## Extension Setup
 
@@ -83,14 +73,11 @@ The enabled api should now be visible in "Enabled APIs and Services" section.
 A. Redirect uri has not been setup correctly OR
 B. Your setup is a local one and not accessible to public.
 
-* Once setup, CiviCRM group add or edit screen would render a Google Group dropdown. Select a matching google group. Sync process will make sure that members of google groups are synced from that of matching Civi Group.
-<img width="761" alt="image" src="https://github.com/greenleafadvancement/org.civicrm.googlegroups/assets/3448551/3563c23c-e389-4572-ab40-433ecb703a52">
+* Once setup, CiviCRM group add or edit screen would render a Google Group dropdown. Select a matching google group. Sync process will make sure that members of google groups are synced from that of matching Civi Group. <img width="761" alt="image" src="https://github.com/greenleafadvancement/org.civicrm.googlegroups/assets/3448551/3563c23c-e389-4572-ab40-433ecb703a52">
 
 * Use Contacts >> Google Groups Sync to run the sync process manually.
 
-* To automate the sync, enable the 'Google Groups Sync (Daily)' job on Administer >> System Settings >> Scheduled Jobs screen.
-
-![Screenshot](/images/civi-settings.png)
+* To automate the sync, enable the 'Google Groups Sync (Daily)' job on Administer >> System Settings >> Scheduled Jobs screen. ![Screenshot](/images/civi-settings.png)
 
 ## Known Issues
 
