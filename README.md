@@ -84,6 +84,7 @@ A. Redirect uri has not been setup correctly OR
 B. Your setup is a local one and not accessible to public.
 
 * Once setup, CiviCRM group add or edit screen would render a Google Group dropdown. Select a matching google group. Sync process will make sure that members of google groups are synced from that of matching Civi Group.
+<img width="761" alt="image" src="https://github.com/greenleafadvancement/org.civicrm.googlegroups/assets/3448551/3563c23c-e389-4572-ab40-433ecb703a52">
 
 * Use Contacts >> Google Groups Sync to run the sync process manually.
 
