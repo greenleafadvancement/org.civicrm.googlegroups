@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'a54a7b684b5b072c4b5ffa5b86811644ce01b8f7',
+        'reference' => 'e556388ef7f8e392fa2b2dde43e93aa5db15cc8f',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'a54a7b684b5b072c4b5ffa5b86811644ce01b8f7',
+            'reference' => 'e556388ef7f8e392fa2b2dde43e93aa5db15cc8f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -83,9 +83,9 @@
             'dev_requirement' => false,
         ),
         'monolog/monolog' => array(
-            'pretty_version' => '3.5.0',
-            'version' => '3.5.0.0',
-            'reference' => 'c915e2634718dbc8a4a15c61b0e62e7a44e14448',
+            'pretty_version' => '2.9.2',
+            'version' => '2.9.2.0',
+            'reference' => '437cb3628f4cf6042cc10ae97fc2b8472e48ca1f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../monolog/monolog',
             'aliases' => array(),
@@ -184,7 +184,7 @@
         'psr/log-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '3.0.0',
+                0 => '1.0.0 || 2.0.0 || 3.0.0',
             ),
         ),
         'ralouphie/getallheaders' => array(
