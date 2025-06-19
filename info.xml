@@ -18,7 +18,7 @@
   <version>2.4</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.0</ver>
+    <ver>5.38</ver>
   </compatibility>
   <comments>
     Original extension (uk.co.vedaconsulting.googlegroup) development by Veda NFP Consulting Ltd (https://vedaconsulting.co.uk/) supporting CiviCRM versions upto v4.6.
@@ -26,5 +26,16 @@
   </comments>
   <civix>
     <namespace>CRM/Googlegroups</namespace>
+    <format>25.01.1</format>
   </civix>
+  <mixins>
+    <mixin>menu-xml@1.0.0</mixin>
+    <mixin>setting-php@1.0.0</mixin>
+    <mixin>smarty-v2@1.0.3</mixin>
+  </mixins>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
+  </classloader>
+  <upgrader>CiviMix\Schema\Googlegroups\AutomaticUpgrader</upgrader>
 </extension>
