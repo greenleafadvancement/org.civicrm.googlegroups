@@ -25,12 +25,12 @@ class CRM_Googlegroups_Utils {
   
   static function getAccessToken() {
     $params = self::getSettings();
-    return CRM_Utils_Array::value('access_token', $params);
+    return $params['access_token'] ?? NULL;
   }
 
   static function getStats() {
     $params = self::getSettings();
-    return CRM_Utils_Array::value('stats', $params);
+    return $params['stats'] ?? NULL;
   }
 
   static function setStats($params) {
@@ -39,7 +39,7 @@ class CRM_Googlegroups_Utils {
 
   static function getDomains() {
     $params = self::getSettings();
-    return CRM_Utils_Array::value('domains', $params, []);
+    return $params['domains'] ?? [];
   }
 
   static function getClient($initTokenIfRequired = TRUE, $regenRefreshToken = FALSE) {
